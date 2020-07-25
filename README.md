@@ -1,30 +1,23 @@
 # Gitlab Pipeline
- This docker image can be used in ```.gitlab-ci.yml``` as below - 
+ This image provides aws-cli that can be used in ```.gitlab-ci.yml``` as below - 
  ```yaml
-image: thenandan/gitlab-pipeline:1.0.3
+image: thenandan/gitlab-pipeline:latest
+
+variables:
+  REPOSITORY_URL: account_id.dkr.region.amazonaws.com/project:latest
+
+services:
+  - docker:dind
 
 stages:
-  - preparation
+  - build
 
-php:
-  stage: preparation
+build:
+  stage: build
   script:
-    - php -v
-composer:
-  stage: preparation
-  script:
-    - composer -v
-git:
-  stage: preparation
-  script:
-    - git --version
-docker:
-  stage: preparation
-  script:
-    - docker -v
-aws:
-  stage: preparation
-  script:
-    - aws --version
+    - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin account_id.dkr.ecr.region.amazonaws.com
+    - docker build --file .docker/Dockerfile -t project .
+    - docker tag project:latest $REPOSITORY_URL
+    - docker push $REPOSITORY_URL
 
 ```
