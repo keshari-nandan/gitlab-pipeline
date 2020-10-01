@@ -4,7 +4,7 @@
 image: thenandan/gitlab-pipeline:latest
 
 variables:
-  REPOSITORY_URL: account_id.dkr.region.amazonaws.com/project:latest
+  REPOSITORY_URL: $AWS_ACCOUNT_ID.dkr.region.amazonaws.com/$PROJECT_NAME:latest
 
 services:
   - docker:dind
@@ -15,9 +15,19 @@ stages:
 build:
   stage: build
   script:
-    - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin account_id.dkr.ecr.region.amazonaws.com
-    - docker build --file .docker/Dockerfile -t project .
-    - docker tag project:latest $REPOSITORY_URL
+    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.region.amazonaws.com
+    - docker build --file Dockerfile -t $PROJECT_NAME .
+    - docker tag $PROJECT_NAME:latest $REPOSITORY_URL
     - docker push $REPOSITORY_URL
 
 ```
+
+# AWS Credentials
+Following AWS KEYS is required to push the image to ECR.
+- AWS_ACCESS_KEY_ID 
+- AWS_DEFAULT_REGION
+- AWS_SECRET_ACCESS_KEY
+- AWS_ACCOUNT_ID
+- PROJECT_NAME
+
+*Note:* Make sure you have the repository as you project name in AWS ECR. 
