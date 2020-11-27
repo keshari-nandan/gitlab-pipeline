@@ -4,7 +4,7 @@
 image: thenandan/gitlab-pipeline:latest
 
 variables:
-  REPOSITORY_URL: $AWS_ACCOUNT_ID.dkr.region.amazonaws.com/$PROJECT_NAME:latest
+  REPOSITORY_URL: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$PROJECT_NAME:latest
 
 services:
   - docker:dind
@@ -15,7 +15,7 @@ stages:
 build:
   stage: build
   script:
-    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.region.amazonaws.com
+    - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
     - docker build --file Dockerfile -t $PROJECT_NAME .
     - docker tag $PROJECT_NAME:latest $REPOSITORY_URL
     - docker push $REPOSITORY_URL
